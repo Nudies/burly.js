@@ -2,7 +2,7 @@
  ## Usage
  
  ```
- <h1 data-bind="greet">{{ greeting }} {{ name }}!</h1>
+ <h1 data-bind="greet">{{ greeting }}, {{ name }}!</h1>
  <script src="burly.js"></script>
  <script>
  	data = {
@@ -13,3 +13,4 @@
    Burly.render('greet', data);
  </script>
  ```
+
