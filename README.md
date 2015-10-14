@@ -1,5 +1,5 @@
- #burly.js lightweight html templating
- ##Usage
+ # burly.js lightweight html templating  
+ ## Usage
  
  ```
  <h1 data-bind="greet">{{ greeting }} {{ name }}!</h1>
