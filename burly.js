@@ -13,7 +13,7 @@
  *			greeting: 'Hello',
  *			name: 'Burly'
  *		};
- *		
+ *
  *    Burly.render('greet', data);
  *	</script>
  */
@@ -22,12 +22,13 @@ var Burly = ( function (){
 	'use strict';
 
 	function Bind( scope, data, debug ) {
-		
-		// Bind object is responsible for binding data
-		// to the templates
-		// @param {string} scope
-		// @param {object} data
-		// @param {object} debug
+		/**
+		 * Bind object is responsible for binding data to the templates
+		 * @constructor
+		 * @param {string} scope - DOM scope.
+		 * @param {object} data - Model data to be bound to scope.
+		 * @param {bool} debug - Debug mode. Default is false.
+		 */
 
 		var q, el, re, re2, match, result;
 
@@ -50,7 +51,7 @@ var Burly = ( function (){
 		}
 
 		match = this.result.match(re);
-		result = this.result;	
+		result = this.result;
 
 		for ( var i = 0; i < match.length; i++ ) {
 			result = result.replace( re2.exec(match[i])[0], data[re2.exec(match[i])[1]] );
@@ -67,11 +68,15 @@ var Burly = ( function (){
 
 	};
 
-
   function render( scope, data, options ) {
-
-		// Creates new bind object
-		// TODO: create facotry for reusable objects
+		/**
+		 * Creates new bind object
+		 * @param {string} scope - DOM scope.
+		 * @param {object} data - Model data to be bound to scope.
+		 * @param {object} options - Options object should have a debug property containing a bool.
+		 *
+		 * TODO: create factory for reusable objects
+		 */
 
 		if ( !options ) {
 			var options = { debug: false };
@@ -86,15 +91,12 @@ var Burly = ( function (){
 
 	};
 
-
 	return {
 
 		render: function( scope, data, options ) {
 			render( scope, data, options );
 		}
 
-	}
-
+	};
 
 }());
-
