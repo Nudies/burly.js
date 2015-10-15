@@ -20,7 +20,8 @@
  *  
  */
 
-var Burly = ( function (){
+var Burly = ( function () {
+
   'use strict';
 
   /**
@@ -40,8 +41,12 @@ var Burly = ( function (){
     /**
      * Updates the Bind object with new data
      * @method update
+     * @memberof Bind
+     * @param {string} scope - DOM scope.
+     * @param {object} data - Model data to be bound to scope.
+     * @param {bool} debug - Debug mode value.
      */
-    self.update = function( scope, data, debug ){
+    self.update = function( scope, data, debug ) {
 
       self.run( scope, data, debug );
 
@@ -50,6 +55,10 @@ var Burly = ( function (){
     /**
      * Sets the Bind objects data
      * @method run
+     * @memberof Bind
+     * @param {string} scope - DOM scope.
+     * @param {object} data - Model data to be bound to scope.
+     * @param {bool} debug - Debug mode value.
      */
     self.run = function( scope, data, debug ) {
 
@@ -113,6 +122,10 @@ var Burly = ( function (){
     /**
      * Creates a new Bind object or uses an existing one
      * @method build
+     * @memberof Bind_factory
+     * @param {string} scope - DOM scope.
+     * @param {object} data - Model data to be bound to scope.
+     * @param {bool} debug - Debug mode value.
      */
     this.build = function( scope, data, debug ) {
 
