@@ -28,105 +28,162 @@
         <article>
             <pre class="prettyprint source linenums"><code>/**
  *  ~burly.js lightweight html templating~
- *	@author: nudies@github.com
- *	@version: 1.0.0
- *	@license: MIT
+ *  @author: nudies@github.com
+ *  @version: 1.0.0
+ *  @license: MIT
  *
  *  ~Usage~
  *
- *  &lt;h1 data-bind="greet">{{ greeting }} {{ name }}!&lt;/h1>
+ *  &lt;h1 data-bind="greet">{{ greeting }}, {{ name }}!&lt;/h1>
  *  &lt;script src="burly.js">&lt;/script>
  *  &lt;script>
- *		data = {
- *			greeting: 'Hello',
- *			name: 'Burly'
- *		};
+ *    data = {
+ *      greeting: 'Hello',
+ *      name: 'Burly'
+ *    };
  *
  *    Burly.render('greet', data);
- *	&lt;/script>
+ *  &lt;/script>
+ *  
+ *  
  */
 
-var Burly = ( function (){
-	'use strict';
+var Burly = ( function () {
 
-	function Bind( scope, data, debug ) {
-		/**
-		 * Bind object is responsible for binding data to the templates
-		 * @constructor Bind
-		 * @param {string} scope - DOM scope.
-		 * @param {object} data - Model data to be bound to scope.
-		 * @param {bool} debug - Debug mode. Default is false.
-		 */
+  'use strict';
 
-		var q, el, re, re2, match, result;
+  /**
+   * Bind object is responsible for binding data to the templates
+   * @constructor Bind
+   * @param {string} scope - DOM scope.
+   * @param {object} data - Model data to be bound to scope.
+   * @param {bool} debug - Debug mode. Default is false.
+   */
+  function Bind( scope, data, debug ) {
 
-		q = document.querySelectorAll('[data-bind]');
-		for ( var i = 0; i &lt; q.length; i++ ) {
-			if (q[i].dataset.bind === scope) {
-				el = q[i];
-			}
-		}
+    var  self, re, re2;
+    self = this;
+    re = /\{\{\s*(\w+)\s*\}\}/g;
+    re2 = /\{\{\s*(\w+)\s*\}\}/;
 
-		if (!el) {
-			throw "undefined scope: " + scope;
-		}
+    /**
+     * Updates the Bind object with new data
+     * @method update
+     * @memberof Bind
+     * @param {string} scope - DOM scope.
+     * @param {object} data - Model data to be bound to scope.
+     * @param {bool} debug - Debug mode value.
+     */
+    self.update = function( scope, data, debug ) {
 
-		re = /\{\{\s*(\w+)\s*\}\}/g;
-		re2 = /\{\{\s*(\w+)\s*\}\}/;
+      self.run( scope, data, debug );
 
-		if (!this.result) {
-			this.result = el.innerHTML;
-		}
+    };
 
-		match = this.result.match(re);
-		result = this.result;
+    /**
+     * Sets the Bind objects data
+     * @method run
+     * @memberof Bind
+     * @param {string} scope - DOM scope.
+     * @param {object} data - Model data to be bound to scope.
+     * @param {bool} debug - Debug mode value.
+     */
+    self.run = function( scope, data, debug ) {
 
-		for ( var i = 0; i &lt; match.length; i++ ) {
-			result = result.replace( re2.exec(match[i])[0], data[re2.exec(match[i])[1]] );
-		}
+      var q, match, result;
 
-		el.innerHTML = result;
+      if (!self.el) {
+        q = document.querySelectorAll('[data-bind]');
 
-		if ( debug ) {
-			console.log( 'Name: ', el.dataset.bind );
-			console.log( 'Target: ', el);
-			console.log( 'Nodes: ', this.result );
-			console.log( 'Data: ', data );
-		}
+        for ( var i = 0; i &lt; q.length; i++ ) {
+          if (q[i].dataset.bind === scope) {
+            self.el = q[i];
+          }
+        }
+      }
 
-	};
+      if (!self.el) {
+        throw "undefined scope: " + scope;
+      }
 
-  function render( scope, data, options ) {
-		/**
-		 * Creates new bind object
-		 * @function render
-		 * @param {string} scope - DOM scope.
-		 * @param {object} data - Model data to be bound to scope.
-		 * @param {object} options - Options object should have a debug property containing a bool.
-		 *
-		 */
-		 // TODO: create factory for reusable objects
+      if (!self.result) {
+        self.result = self.el.innerHTML;
+      }
 
-		if ( !options ) {
-			var options = { debug: false };
-		}
+      match = self.result.match(re);
+      result = self.result;
 
-		if ( options.debug ) {
-			new Bind( scope, data, true );
-		}
-		else {
-			new Bind( scope, data, false );
-		}
+      for ( var x = 0; x &lt; match.length; x++ ) {
+        result = result.replace( re2.exec(match[x])[0], data[re2.exec(match[x])[1]] );
+      }
 
-	};
+      self.el.innerHTML = result;
 
-	return {
+      if ( debug ) {
+        console.log( 'Name: ', self.el.dataset.bind );
+        console.log( 'Target: ', self.el);
+        console.log( 'Nodes: ', this.result );
+        console.log( 'Data: ', data );
+      }
 
-		render: function( scope, data, options ) {
-			render( scope, data, options );
-		}
+    };
 
-	};
+    //Run on initialization
+    self.run( scope, data, debug );
+
+  }
+
+
+  /**
+   * Creates new bind object
+   * @constructor Bind_factory
+   * @param {string} scope - DOM scope.
+   * @param {object} data - Model data to be bound to scope.
+   * @param {bool} debug - Debug mode. Default is false.
+   */
+  function Bind_factory( ) {
+    var binds;
+
+    // Collection of binds
+    binds = {};
+
+    /**
+     * Creates a new Bind object or uses an existing one
+     * @method build
+     * @memberof Bind_factory
+     * @param {string} scope - DOM scope.
+     * @param {object} data - Model data to be bound to scope.
+     * @param {bool} debug - Debug mode value.
+     */
+    this.build = function( scope, data, debug ) {
+
+      var bind;
+
+      if ( typeof debug === 'undefined' ) {
+        debug = false;
+      }
+
+      if ( !binds[scope] ) {
+        bind = new Bind( scope, data, debug );
+        binds[scope] = bind;
+      }
+      else {
+        binds[scope].update( scope, data, debug );
+      }
+
+    };
+
+  }
+  
+  var Factory = new Bind_factory();
+
+  return {
+
+    render: function( scope, data, debug ) {
+      Factory.build( scope, data, debug );
+    }
+
+  };
 
 }());
 </code></pre>
@@ -139,13 +196,13 @@ var Burly = ( function (){
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Bind.html">Bind</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Burly">Burly</a></li><li><a href="global.html#render">render</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Bind.html">Bind</a></li><li><a href="Bind_factory.html">Bind_factory</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Burly">Burly</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Wed Oct 14 2015 15:33:01 GMT-0700 (Pacific Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Thu Oct 15 2015 12:25:03 GMT-0700 (Pacific Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
