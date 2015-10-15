@@ -1,4 +1,5 @@
 # burly.js 
+[![NPM](https://nodei.co/npm/burly.png?compact=true)](https://npmjs.org/package/burly)  
 lightweight html templating
 
 ## Usage
