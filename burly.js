@@ -16,37 +16,43 @@
  *
  *    Burly.render('greet', data);
  *  </script>
+ *  
+ *  
  */
 
 var Burly = ( function (){
   'use strict';
 
+  /**
+   * Bind object is responsible for binding data to the templates
+   * @constructor Bind
+   * @param {string} scope - DOM scope.
+   * @param {object} data - Model data to be bound to scope.
+   * @param {bool} debug - Debug mode. Default is false.
+   */
   function Bind( scope, data, debug ) {
-    /**
-     * Bind object is responsible for binding data to the templates
-     * @constructor Bind
-     * @param {string} scope - DOM scope.
-     * @param {object} data - Model data to be bound to scope.
-     * @param {bool} debug - Debug mode. Default is false.
-     */
 
-    // init
     var  self, re, re2;
-
     self = this;
     re = /\{\{\s*(\w+)\s*\}\}/g;
     re2 = /\{\{\s*(\w+)\s*\}\}/;
 
-
-
-    // Members
+    /**
+     * Updates the Bind object with new data
+     * @method update
+     */
     self.update = function( scope, data, debug ){
 
       self.run( scope, data, debug );
 
     };
 
+    /**
+     * Sets the Bind objects data
+     * @method run
+     */
     self.run = function( scope, data, debug ) {
+
       var q, match, result;
 
       if (!self.el) {
@@ -82,29 +88,36 @@ var Burly = ( function (){
         console.log( 'Nodes: ', this.result );
         console.log( 'Data: ', data );
       }
+
     };
 
+    //Run on initialization
     self.run( scope, data, debug );
 
   }
 
-  function Bind_factory( ) {
-    /**
-     * Creates new bind object
-     * @function bind_factory
-     * @param {string} scope - DOM scope.
-     * @param {object} data - Model data to be bound to scope.
-     * @param {bool} debug - Debug mode. Default is false.
-     *
-     */
-     // TODO: create factory for reusable objects
 
-    var binds, bind;
+  /**
+   * Creates new bind object
+   * @constructor Bind_factory
+   * @param {string} scope - DOM scope.
+   * @param {object} data - Model data to be bound to scope.
+   * @param {bool} debug - Debug mode. Default is false.
+   */
+  function Bind_factory( ) {
+    var binds;
 
     // Collection of binds
     binds = {};
 
+    /**
+     * Creates a new Bind object or uses an existing one
+     * @method build
+     */
     this.build = function( scope, data, debug ) {
+
+      var bind;
+
       if ( typeof debug === 'undefined' ) {
         debug = false;
       }
@@ -116,6 +129,7 @@ var Burly = ( function (){
       else {
         binds[scope].update( scope, data, debug );
       }
+
     };
 
   }
