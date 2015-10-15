@@ -1,6 +1,6 @@
 {
   "name": "burly",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lightweight html templating",
   "main": "burly.js",
   "scripts": {
