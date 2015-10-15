@@ -53,8 +53,8 @@ var Burly = ( function (){
 		match = this.result.match(re);
 		result = this.result;
 
-		for ( var i = 0; i < match.length; i++ ) {
-			result = result.replace( re2.exec(match[i])[0], data[re2.exec(match[i])[1]] );
+		for ( var x = 0; x < match.length; x++ ) {
+			result = result.replace( re2.exec(match[x])[0], data[re2.exec(match[x])[1]] );
 		}
 
 		el.innerHTML = result;
@@ -66,36 +66,36 @@ var Burly = ( function (){
 			console.log( 'Data: ', data );
 		}
 
-	};
+	}
 
-  function render( scope, data, options ) {
+  function render( scope, data, debug ) {
 		/**
 		 * Creates new bind object
 		 * @function render
 		 * @param {string} scope - DOM scope.
 		 * @param {object} data - Model data to be bound to scope.
-		 * @param {object} options - Options object should have a debug property containing a bool.
+		 * @param {bool} debug - Debug mode. Default is false.
 		 *
 		 */
 		 // TODO: create factory for reusable objects
 
-		if ( !options ) {
-			var options = { debug: false };
+		if ( typeof debug === 'undefined' ) {
+			debug = false;
 		}
 
-		if ( options.debug ) {
-			new Bind( scope, data, true );
+		if ( debug ) {
+			new Bind( scope, data, debug );
 		}
 		else {
-			new Bind( scope, data, false );
+			new Bind( scope, data, debug );
 		}
 
-	};
+	}
 
 	return {
 
-		render: function( scope, data, options ) {
-			render( scope, data, options );
+		render: function( scope, data, debug ) {
+			render( scope, data, debug );
 		}
 
 	};
