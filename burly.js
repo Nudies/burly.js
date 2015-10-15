@@ -30,48 +30,68 @@ var Burly = ( function (){
      * @param {bool} debug - Debug mode. Default is false.
      */
 
-    var q, el, re, re2, match, result;
+    // init
+    var  self, re, re2;
 
-    q = document.querySelectorAll('[data-bind]');
-    for ( var i = 0; i < q.length; i++ ) {
-      if (q[i].dataset.bind === scope) {
-        el = q[i];
-      }
-    }
-
-    if (!el) {
-      throw "undefined scope: " + scope;
-    }
-
+    self = this;
     re = /\{\{\s*(\w+)\s*\}\}/g;
     re2 = /\{\{\s*(\w+)\s*\}\}/;
 
-    if (!this.result) {
-      this.result = el.innerHTML;
-    }
 
-    match = this.result.match(re);
-    result = this.result;
 
-    for ( var x = 0; x < match.length; x++ ) {
-      result = result.replace( re2.exec(match[x])[0], data[re2.exec(match[x])[1]] );
-    }
+    // Members
+    self.update = function( scope, data, debug ){
 
-    el.innerHTML = result;
+      self.run( scope, data, debug );
 
-    if ( debug ) {
-      console.log( 'Name: ', el.dataset.bind );
-      console.log( 'Target: ', el);
-      console.log( 'Nodes: ', this.result );
-      console.log( 'Data: ', data );
-    }
+    };
+
+    self.run = function( scope, data, debug ) {
+      var q, match, result;
+
+      if (!self.el) {
+        q = document.querySelectorAll('[data-bind]');
+
+        for ( var i = 0; i < q.length; i++ ) {
+          if (q[i].dataset.bind === scope) {
+            self.el = q[i];
+          }
+        }
+      }
+
+      if (!self.el) {
+        throw "undefined scope: " + scope;
+      }
+
+      if (!self.result) {
+        self.result = self.el.innerHTML;
+      }
+
+      match = self.result.match(re);
+      result = self.result;
+
+      for ( var x = 0; x < match.length; x++ ) {
+        result = result.replace( re2.exec(match[x])[0], data[re2.exec(match[x])[1]] );
+      }
+
+      self.el.innerHTML = result;
+
+      if ( debug ) {
+        console.log( 'Name: ', self.el.dataset.bind );
+        console.log( 'Target: ', self.el);
+        console.log( 'Nodes: ', this.result );
+        console.log( 'Data: ', data );
+      }
+    };
+
+    self.run( scope, data, debug );
 
   }
 
-  function render( scope, data, debug ) {
+  function Bind_factory( ) {
     /**
      * Creates new bind object
-     * @function render
+     * @function bind_factory
      * @param {string} scope - DOM scope.
      * @param {object} data - Model data to be bound to scope.
      * @param {bool} debug - Debug mode. Default is false.
@@ -79,23 +99,33 @@ var Burly = ( function (){
      */
      // TODO: create factory for reusable objects
 
-    if ( typeof debug === 'undefined' ) {
-      debug = false;
-    }
+    var binds, bind;
 
-    if ( debug ) {
-      new Bind( scope, data, debug );
-    }
-    else {
-      new Bind( scope, data, debug );
-    }
+    // Collection of binds
+    binds = {};
+
+    this.build = function( scope, data, debug ) {
+      if ( typeof debug === 'undefined' ) {
+        debug = false;
+      }
+
+      if ( !binds[scope] ) {
+        bind = new Bind( scope, data, debug );
+        binds[scope] = bind;
+      }
+      else {
+        binds[scope].update( scope, data, debug );
+      }
+    };
 
   }
+  
+  var Factory = new Bind_factory();
 
   return {
 
     render: function( scope, data, debug ) {
-      render( scope, data, debug );
+      Factory.build( scope, data, debug );
     }
 
   };
