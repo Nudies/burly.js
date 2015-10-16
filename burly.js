@@ -20,10 +20,17 @@
  *  
  */
 
-var Burly = ( function () {
+( function ( global ) {
 
   'use strict';
+  var Burly = {};
 
+  if (typeof exports !== 'undefined') {
+    exports.Burly = Burly;
+    exports.Bind = Bind;
+    exports.Bind_factory = Bind_factory;
+  }
+  
   /**
    * Bind object is responsible for binding data to the templates
    * @constructor Bind
@@ -149,12 +156,15 @@ var Burly = ( function () {
   
   var Factory = new Bind_factory();
 
-  return {
 
-    render: function( scope, data, debug ) {
-      Factory.build( scope, data, debug );
-    }
+  function render( scope, data, debug ) {
 
-  };
+    Factory.build( scope, data, debug );
 
-}());
+  }
+
+  Burly.render = render;
+  global.Burly = Burly;
+
+
+}( this ));
