@@ -8,7 +8,6 @@ module.exports = function(grunt) {
 		jshint: {
 			files: ['Gruntfile.js', '<%= pkg.name %>.js']
 		},
-
     uglify: {
       options: {
         banner: '/*! <%= pkg.name %>.js <%= grunt.template.today("yyyy-mm-dd") %> */\n'
@@ -18,7 +17,6 @@ module.exports = function(grunt) {
         dest: '<%= pkg.name %>.min.js'
       }
     },
-
 		watch: {
 			files: ['<%= pkg.name %>.js'],
 			tasks: ['jshint', 'uglify'],
