@@ -29,7 +29,7 @@
             <pre class="prettyprint source linenums"><code>/**
  *  ~burly.js lightweight html templating~
  *  @author: nudies@github.com
- *  @version: 1.0.0
+ *  @version: 1.0.3
  *  @license: MIT
  *
  *  ~Usage~
@@ -44,13 +44,20 @@
  *
  *    Burly.render('greet', data);
  *  &lt;/script>
- *  
- *  
+ *
+ *
  */
 
-var Burly = ( function () {
+( function ( global ) {
 
   'use strict';
+  var Burly = {};
+
+  if (typeof exports !== 'undefined') {
+    exports.Burly = Burly;
+    exports.Bind = Bind;
+    exports.Bind_factory = Bind_factory;
+  }
 
   /**
    * Bind object is responsible for binding data to the templates
@@ -65,6 +72,10 @@ var Burly = ( function () {
     self = this;
     re = /\{\{\s*(\w+)\s*\}\}/g;
     re2 = /\{\{\s*(\w+)\s*\}\}/;
+
+    self.root = false;
+    self.nodes = {};
+    self.token = 0;
 
     /**
      * Updates the Bind object with new data
@@ -81,7 +92,70 @@ var Burly = ( function () {
     };
 
     /**
-     * Sets the Bind objects data
+     * Perform a regex search on a elements textNode.
+     * If it matches the {{ }} pattern then add to our node obj.
+     * @method regex_check
+     * @memberof Bind
+     * @param {object} el - A DOM element that does NOT have children.
+     */
+    self.regex_check = function( el ) {
+
+      if ( el.childNodes.length ) {
+        if ( el.childNodes[0].nodeValue.match(re) ) {
+          self.nodes[self.token] = {
+            el: el,
+            binding: el.innerHTML.match(re),
+            origin: el.innerHTML
+          };
+          ++self.token;
+        }
+      }
+
+    };
+
+    /**
+     * Recursively search a element until it has no more children.
+     * @method traverse_DOM
+     * @memberof Bind
+     * @param {object} el - a DOM element that may or maynot have children.
+     */
+    self.traverse_DOM = function( el ){
+
+      if ( el.childElementCount === 0 ) {
+        self.regex_check( el );
+      }
+      else {
+        for ( var i = 0; i &lt; el.childElementCount; i++ ) {
+          self.traverse_DOM( el.children[i] );
+        }
+      }
+
+    };
+
+    /**
+     * Binds the data object to its coresponding DOM element
+     * and replaces the {{ key }} with the data model value.
+     * @method bind_data
+     * @memberof Bind
+     * @param {object} data - Model data to be bound to scope.
+     */
+    self.bind_data = function( data ) {
+
+      for ( var key in self.nodes ) {
+        self.nodes[key]['el'].innerHTML = self.nodes[key]['origin'];
+        for ( var x = 0; x &lt; self.nodes[key]['binding'].length; x++ ) {
+          self.nodes[key]['el'].innerHTML = self.nodes[key]['el'].innerHTML.replace(
+            re2.exec(self.nodes[key]['binding'][x])[0],
+            data[re2.exec(self.nodes[key]['binding'][x])[1]]
+          );
+        }
+      }
+
+    };
+
+    /**
+     * Core method for setting our instance variables and running
+     * the the data_bind method.
      * @method run
      * @memberof Bind
      * @param {string} scope - DOM scope.
@@ -92,37 +166,31 @@ var Burly = ( function () {
 
       var q, match, result;
 
-      if (!self.el) {
+      // Find the element scope we want to work with
+      if ( !self.root ) {
         q = document.querySelectorAll('[data-bind]');
 
         for ( var i = 0; i &lt; q.length; i++ ) {
-          if (q[i].dataset.bind === scope) {
-            self.el = q[i];
+          if ( q[i].dataset.bind === scope ) {
+            self.root = q[i];
           }
         }
       }
 
-      if (!self.el) {
+      if ( !self.root ) {
         throw "undefined scope: " + scope;
       }
 
-      if (!self.result) {
-        self.result = self.el.innerHTML;
+      if ( self.root &amp;&amp; !self.nodes.length ) {
+        self.traverse_DOM(self.root);
       }
 
-      match = self.result.match(re);
-      result = self.result;
-
-      for ( var x = 0; x &lt; match.length; x++ ) {
-        result = result.replace( re2.exec(match[x])[0], data[re2.exec(match[x])[1]] );
-      }
-
-      self.el.innerHTML = result;
+      self.bind_data( data );
 
       if ( debug ) {
-        console.log( 'Name: ', self.el.dataset.bind );
-        console.log( 'Target: ', self.el);
-        console.log( 'Nodes: ', this.result );
+        console.log( 'Name: ', self.root.dataset.bind );
+        console.log( 'Target: ', self.root);
+        console.log( 'Nodes: ', self.nodes );
         console.log( 'Data: ', data );
       }
 
@@ -174,18 +242,19 @@ var Burly = ( function () {
     };
 
   }
-  
+
   var Factory = new Bind_factory();
 
-  return {
 
-    render: function( scope, data, debug ) {
-      Factory.build( scope, data, debug );
-    }
+  Burly.render = function( scope, data, debug ) {
 
-  };
+    Factory.build( scope, data, debug );
 
-}());
+  }
+
+  global.Burly = Burly;
+
+}( this ));
 </code></pre>
         </article>
     </section>
@@ -196,13 +265,13 @@ var Burly = ( function () {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Bind.html">Bind</a></li><li><a href="Bind_factory.html">Bind_factory</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Burly">Burly</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Bind.html">Bind</a></li><li><a href="Bind_factory.html">Bind_factory</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Thu Oct 15 2015 12:25:03 GMT-0700 (Pacific Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Wed Oct 21 2015 17:33:54 GMT-0700 (Pacific Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

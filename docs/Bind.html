@@ -188,7 +188,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="burly.js.html">burly.js</a>, <a href="burly.js.html#line27">line 27</a>
+        <a href="burly.js.html">burly.js</a>, <a href="burly.js.html#line34">line 34</a>
     </li></ul></dd>
     
 
@@ -237,6 +237,268 @@
 
     
 
+    <h4 class="name" id=".bind_data"><span class="type-signature">(static) </span>bind_data<span class="signature">(data)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Binds the data object to its coresponding DOM elementand replaces the {{ key }} with the data model value.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Model data to be bound to scope.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="burly.js.html">burly.js</a>, <a href="burly.js.html#line107">line 107</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".regex_check"><span class="type-signature">(static) </span>regex_check<span class="signature">(el)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Perform a regex search on a elements textNode.If it matches the {{ }} pattern then add to our node obj.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>el</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A DOM element that does NOT have children.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="burly.js.html">burly.js</a>, <a href="burly.js.html#line66">line 66</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
     <h4 class="name" id=".run"><span class="type-signature">(static) </span>run<span class="signature">(scope, data, debug)</span><span class="type-signature"></span></h4>
 
     
@@ -244,7 +506,7 @@
 
 
 <div class="description">
-    Sets the Bind objects data
+    Core method for setting our instance variables and runningthe the data_bind method.
 </div>
 
 
@@ -383,7 +645,138 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="burly.js.html">burly.js</a>, <a href="burly.js.html#line55">line 55</a>
+        <a href="burly.js.html">burly.js</a>, <a href="burly.js.html#line128">line 128</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".traverse_DOM"><span class="type-signature">(static) </span>traverse_DOM<span class="signature">(el)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Recursively search a element until it has no more children.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>el</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">a DOM element that may or maynot have children.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="burly.js.html">burly.js</a>, <a href="burly.js.html#line88">line 88</a>
     </li></ul></dd>
     
 
@@ -560,7 +953,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="burly.js.html">burly.js</a>, <a href="burly.js.html#line41">line 41</a>
+        <a href="burly.js.html">burly.js</a>, <a href="burly.js.html#line52">line 52</a>
     </li></ul></dd>
     
 
@@ -602,13 +995,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Bind.html">Bind</a></li><li><a href="Bind_factory.html">Bind_factory</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Burly">Burly</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Bind.html">Bind</a></li><li><a href="Bind_factory.html">Bind_factory</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Thu Oct 15 2015 12:25:03 GMT-0700 (Pacific Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.3</a> on Wed Oct 21 2015 17:33:54 GMT-0700 (Pacific Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
