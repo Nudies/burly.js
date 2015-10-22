@@ -5,9 +5,9 @@ module.exports = function(grunt) {
 
     pkg: grunt.file.readJSON('package.json'),
 
-		jshint: {
-			files: ['Gruntfile.js', '<%= pkg.name %>.js']
-		},
+    jshint: {
+      files: ['Gruntfile.js', '<%= pkg.name %>.js']
+    },
     uglify: {
       options: {
         banner: '/*! <%= pkg.name %>.js <%= grunt.template.today("yyyy-mm-dd") %> */\n'
@@ -17,13 +17,13 @@ module.exports = function(grunt) {
         dest: '<%= pkg.name %>.min.js'
       }
     },
-		watch: {
-			files: ['<%= pkg.name %>.js'],
-			tasks: ['jshint', 'uglify'],
-			options: {
-				spawn: false,
-			}
-		}
+    watch: {
+      files: ['<%= pkg.name %>.js'],
+      tasks: ['jshint', 'uglify'],
+      options: {
+        spawn: false,
+      }
+    }
 
   });
 
