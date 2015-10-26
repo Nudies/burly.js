@@ -69,6 +69,7 @@
      * @method regex_check
      * @memberof Bind
      * @param {object} el - A DOM element that does NOT have children.
+     * @param {number} x - Index location for list el.childNodes.
      */
     self.regex_check = function( el, x ) {
 
