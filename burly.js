@@ -70,14 +70,15 @@
      * @memberof Bind
      * @param {object} el - A DOM element that does NOT have children.
      */
-    self.regex_check = function( el ) {
+    self.regex_check = function( el, x ) {
 
-      if ( el.childNodes.length ) {
-        if ( el.childNodes[0].nodeValue.match(re) ) {
+      if ( el.childNodes[x].nodeValue ) {
+        if ( el.childNodes[x].nodeValue.match(re) ) {
           self.nodes[self.token] = {
             el: el,
-            binding: el.innerHTML.match(re),
-            origin: el.innerHTML
+            binding: el.childNodes[x].nodeValue.match(re),
+            origin: el.childNodes[x].nodeValue,
+            key: x
           };
           ++self.token;
         }
@@ -93,13 +94,14 @@
      */
     self.traverse_DOM = function( el ){
 
-      if ( el.childElementCount === 0 ) {
-        self.regex_check( el );
-      }
-      else {
-        for ( var i = 0; i < el.childElementCount; i++ ) {
-          self.traverse_DOM( el.children[i] );
+      for ( var x = 0; x < el.childNodes.length; x++ ) {
+        if ( el.childNodes[x].nodeName === '#text' ) {
+          self.regex_check( el, x );
         }
+      }
+      
+      for ( var i = 0; i < el.childElementCount; i++ ) {
+        self.traverse_DOM( el.children[i] );
       }
 
     };
@@ -112,13 +114,15 @@
      * @param {object} data - Model data to be bound to scope.
      */
     self.bind_data = function( data ) {
+      var k; 
 
       for ( var key in self.nodes ) {
-        self.nodes[key]['el'].innerHTML = self.nodes[key]['origin'];
-        for ( var x = 0; x < self.nodes[key]['binding'].length; x++ ) {
-          self.nodes[key]['el'].innerHTML = self.nodes[key]['el'].innerHTML.replace(
-            re2.exec(self.nodes[key]['binding'][x])[0],
-            data[re2.exec(self.nodes[key]['binding'][x])[1]]
+        k = self.nodes[key].key;  
+        self.nodes[key].el.childNodes[k].nodeValue = self.nodes[key].origin;
+        for ( var x = 0; x < self.nodes[key].binding.length; x++ ) {
+          self.nodes[key].el.childNodes[k].nodeValue = self.nodes[key].el.childNodes[k].nodeValue.replace(
+            re2.exec(self.nodes[key].binding[x])[0],
+            data[re2.exec(self.nodes[key].binding[x])[1]]
           );
         }
       }
@@ -222,7 +226,7 @@
 
     Factory.build( scope, data, debug );
 
-  }
+  };
 
   global.Burly = Burly;
 
