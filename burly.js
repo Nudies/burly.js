@@ -3,21 +3,6 @@
  *  @author: nudies@github.com
  *  @version: 1.0.3
  *  @license: MIT
- *
- *  ~Usage~
- *
- *  <h1 data-bind="greet">{{ greeting }}, {{ name }}!</h1>
- *  <script src="burly.js"></script>
- *  <script>
- *    data = {
- *      greeting: 'Hello',
- *      name: 'Burly'
- *    };
- *
- *    Burly.render('greet', data);
- *  </script>
- *
- *
  */
 
 ( function ( global ) {
@@ -25,10 +10,9 @@
   'use strict';
   var Burly = {};
 
-  if (typeof exports !== 'undefined') {
-    exports.Burly = Burly;
-    exports.Bind = Bind;
-    exports.Bind_factory = Bind_factory;
+  if (global.QUnit !== 'undefined') {
+    global.Bind = Bind;
+    global.Bind_factory = Bind_factory;
   }
 
   /**
