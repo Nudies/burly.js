@@ -1,6 +1,6 @@
 [![NPM](https://nodei.co/npm/burly.png?compact=true)](https://npmjs.org/package/burly)  
 # burly.js 
-js templating
+js data binding
 
 ## Usage
  ```html
