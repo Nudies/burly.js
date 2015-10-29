@@ -6,71 +6,80 @@
  */
 
 ( function ( global ) {
-
   'use strict';
   var Burly = {};
+  var safe = ['PRE', 'CODE'];  // Element that won't be inspected
+  var re = /\{\{\s*(\w+)\s*\}\}/g;
+  var re2 = /\{\{\s*(\w+)\s*\}\}/;
 
-  if (global.QUnit !== 'undefined') {
+
+  if ( global.QUnit !== 'undefined' ) {
     global.Bind = Bind;
     global.Bind_factory = Bind_factory;
+    global.Util = {
+      curlyRe: curlyRe
+    };
+  }
+
+  /**
+   * Returns a an array of matched results or null
+   * @function curlyRe
+   * @param {string} str
+   * @returns {Array} An Array containing the matched results or null
+   */
+  function curlyRe( str ) {
+    return str.match(re);
   }
 
   /**
    * Bind object is responsible for binding data to the templates
    * @constructor Bind
-   * @param {string} scope - DOM scope.
-   * @param {object} data - Model data to be bound to scope.
+   * @param {string} view - DOM scope.
+   * @param {object} data - Model data to be bound to view.
    * @param {bool} debug - Debug mode. Default is false.
    */
-  function Bind( scope, data, debug ) {
-
-    this.re = /\{\{\s*(\w+)\s*\}\}/g;
-    this.re2 = /\{\{\s*(\w+)\s*\}\}/;
-    this.safe = ['PRE', 'CODE'];
+  function Bind( view, data, debug ) {
     this.root = false;
     this.nodes = {};
     this.token = 0;
 
-    this.run( scope, data, debug );
-
+    this.run( view, data, debug );
   }
 
   /**
    * Updates the Bind object with new data
    * @method update
    * @memberof Bind
-   * @param {string} scope - DOM scope.
-   * @param {object} data - Model data to be bound to scope.
+   * @param {string} view - DOM scope.
+   * @param {object} data - Model data to be bound to view.
    * @param {bool} debug - Debug mode value.
    */
-  Bind.prototype.update = function( scope, data, debug ) {
-
-    this.run( scope, data, debug );
-
+  Bind.prototype.update = function( view, data, debug ) {
+    this.run( view, data, debug );
   };
 
   /**
    * Perform a regex search on a elements textNode.
    * If it matches the {{ }} pattern then add to our node obj.
-   * @method regex_check
+   * @method node_builder
    * @memberof Bind
    * @param {object} el - A DOM element that does NOT have children.
    * @param {number} x - Index location for list el.childNodes.
    */
-  Bind.prototype.regex_check = function( el, x ) {
+  Bind.prototype.node_builder = function( el, x ) {
+    var txtNode = el.childNodes[x].nodeValue;
 
-    if ( el.childNodes[x].nodeValue ) {
-      if ( el.childNodes[x].nodeValue.match(this.re) ) {
+    if ( txtNode ) {
+      if ( curlyRe( txtNode ) ) {
         this.nodes[this.token] = {
           el: el,
-          binding: el.childNodes[x].nodeValue.match(this.re),
-          origin: el.childNodes[x].nodeValue,
+          binding: curlyRe( txtNode ),
+          origin: txtNode,
           key: x
         };
         ++this.token;
       }
     }
-
   };
 
   /**
@@ -80,20 +89,18 @@
    * @param {object} el - a DOM element that may or maynot have children.
    */
   Bind.prototype.traverse_DOM = function( el ){
-
     for ( var x = 0; x < el.childNodes.length; x++ ) {
       if ( el.childNodes[x].nodeName === '#text' ) {
-        this.regex_check( el, x );
+        this.node_builder( el, x );
       }
     }
-    
+
     for ( var i = 0; i < el.childElementCount; i++ ) {
       // Do not inspect elements inside of the safe array for bindings
-      if ( this.safe.indexOf(el.children[i].nodeName) === -1 ) {
+      if ( safe.indexOf( el.children[i].nodeName ) === -1 ) {
         this.traverse_DOM( el.children[i] );
       }
     }
-
   };
 
   /**
@@ -101,50 +108,50 @@
    * and replaces the {{ key }} with the data model value.
    * @method bind_data
    * @memberof Bind
-   * @param {object} data - Model data to be bound to scope.
+   * @param {object} data - Model data to be bound to view.
    */
   Bind.prototype.bind_data = function( data ) {
-    var k; 
+    var node, k;
 
     for ( var key in this.nodes ) {
-      k = this.nodes[key].key;  
-      this.nodes[key].el.childNodes[k].nodeValue = this.nodes[key].origin;
-      for ( var x = 0; x < this.nodes[key].binding.length; x++ ) {
-        this.nodes[key].el.childNodes[k].nodeValue = this.nodes[key].el.childNodes[k].nodeValue.replace(
-          this.re2.exec(this.nodes[key].binding[x])[0],
-          data[this.re2.exec(this.nodes[key].binding[x])[1]]
+      node = this.nodes[key];
+      k = node.key;
+
+      node.el.childNodes[k].nodeValue = node.origin;
+      for ( var x = 0; x < node.binding.length; x++ ) {
+        node.el.childNodes[k].nodeValue = node.el.childNodes[k].nodeValue.replace(
+          re2.exec( node.binding[x] )[0],
+          data[re2.exec( node.binding[x] )[1]]
         );
       }
     }
-
   };
 
   /**
    * Core method for setting our instance variables and running
-   * the the data_bind method.
+   * the the bind_data method.
    * @method run
    * @memberof Bind
-   * @param {string} scope - DOM scope.
-   * @param {object} data - Model data to be bound to scope.
+   * @param {string} view - DOM scope.
+   * @param {object} data - Model data to be bound to view.
    * @param {bool} debug - Debug mode value.
    */
-  Bind.prototype.run = function( scope, data, debug ) {
-
+  Bind.prototype.run = function( view, data, debug ) {
     var q, match, result;
 
-    // Find the element scope we want to work with
+    // Find the element view we want to work with
     if ( !this.root ) {
       q = document.querySelectorAll('[data-bind]');
 
       for ( var i = 0; i < q.length; i++ ) {
-        if ( q[i].dataset.bind === scope ) {
+        if ( q[i].dataset.bind === view ) {
           this.root = q[i];
         }
       }
     }
 
     if ( !this.root ) {
-      throw "undefined scope: " + scope;
+      throw "undefined view: " + view;
     }
 
     if ( this.root && !this.nodes.length ) {
@@ -159,32 +166,30 @@
       console.log( 'Nodes: ', this.nodes );
       console.log( 'Data: ', data );
     }
-
   };
 
 
   /**
-   * Creates new bind object
+   * Creates new Bind object or reuses one if it already
+   * exists for a givien view
    * @constructor Bind_factory
-   * @param {string} scope - DOM scope.
-   * @param {object} data - Model data to be bound to scope.
+   * @param {string} view - DOM scope.
+   * @param {object} data - Model data to be bound to view.
    * @param {bool} debug - Debug mode. Default is false.
    */
   function Bind_factory( ) {
-    var binds;
-
-    // Collection of binds
-    binds = {};
+    // Collection of Bind objects
+    var binds = {};
 
     /**
      * Creates a new Bind object or uses an existing one
      * @method build
      * @memberof Bind_factory
-     * @param {string} scope - DOM scope.
-     * @param {object} data - Model data to be bound to scope.
+     * @param {string} view - DOM scope.
+     * @param {object} data - Model data to be bound to view.
      * @param {bool} debug - Debug mode value.
      */
-    this.build = function( scope, data, debug ) {
+    this.build = function( view, data, debug ) {
 
       var bind;
 
@@ -192,25 +197,19 @@
         debug = false;
       }
 
-      if ( !binds[scope] ) {
-        bind = new Bind( scope, data, debug );
-        binds[scope] = bind;
+      if ( !binds[view] ) {
+        bind = new Bind( view, data, debug );
+        binds[view] = bind;
+      } else {
+        binds[view].update( view, data, debug );
       }
-      else {
-        binds[scope].update( scope, data, debug );
-      }
-
     };
-
   }
 
   var Factory = new Bind_factory();
 
-
-  Burly.render = function( scope, data, debug ) {
-
-    Factory.build( scope, data, debug );
-
+  Burly.render = function( view, data, debug ) {
+    Factory.build( view, data, debug );
   };
 
   global.Burly = Burly;
