@@ -1,7 +1,7 @@
 /**
  *  ~burly.js lightweight html templating~
  *  @author: nudies@github.com
- *  @version: 1.0.3
+ *  @version: 1.0.5
  *  @license: MIT
  */
 
@@ -193,7 +193,7 @@
 
       var bind;
 
-      if ( typeof debug === 'undefined' ) {
+      if ( typeof debug !== true ) {
         debug = false;
       }
 
