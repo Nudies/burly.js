@@ -14,6 +14,8 @@
 
 
   if ( global.QUnit !== 'undefined' ) {
+    // Objects and functions we want to expose to
+    // the global scope for testing.
     global.Bind = Bind;
     global.Bind_factory = Bind_factory;
     global.Util = {

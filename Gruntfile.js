@@ -18,10 +18,18 @@ module.exports = function(grunt) {
       }
     },
     watch: {
-      files: ['<%= pkg.name %>.js'],
-      tasks: ['jshint', 'uglify'],
+      files: ['<%= pkg.name %>.js', 'test/*.js'],
+      tasks: ['jshint', 'uglify', 'qunit'],
       options: {
         spawn: false,
+      }
+    },
+    qunit: {
+      all: ['test/*.html']
+    },
+    githooks: {
+      all: {
+        'pre-commit': 'jshint uglify qunit'
       }
     }
 
@@ -30,7 +38,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-qunit');
+  grunt.loadNpmTasks('grunt-githooks');
 
-  grunt.registerTask('default', ['uglify', 'jshint']);
+  grunt.registerTask('default', ['uglify', 'jshint', 'qunit', 'githooks']);
 
 };
