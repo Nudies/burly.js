@@ -3,7 +3,7 @@ function restoreState(el, body) {
   el.innerHTML = body;
 }
 
-// Contains tests for utility functions
+
 QUnit.module("Util", function( hooks ) {
   QUnit.test("curlyRe()", function( assert ) {
     assert.equal(
@@ -28,13 +28,11 @@ QUnit.module("Util", function( hooks ) {
 // Contains tests for the Burly singleton.
 // This is the api that end users will consume.
 QUnit.module("Burly", function( hooks ) {
-  // setUp before each test
   hooks.beforeEach(function() {
     this.el = document.getElementById("test-element");
     this.data = { testBind: "Successful Bind" };
   });
 
-  // tearDown after each test
   hooks.afterEach(function() {
     restoreState(this.el, "{{ testBind }}");
   });
@@ -71,16 +69,13 @@ QUnit.module("Burly", function( hooks ) {
 });
 
 
-// Contains test for the Bind constructor
 QUnit.module("Bind", function( hooks ) {
-  // setUp before each test
   hooks.beforeEach(function() {
     this.el = document.getElementById("test-element");
     this.data = { testBind: "Successful Bind" };
     this.bind = new Bind( "view", this.data );
   });
 
-  // tearDown after each test
   hooks.afterEach(function() {
     restoreState(this.el, "{{ testBind }}");
   });
@@ -114,37 +109,75 @@ QUnit.module("Bind", function( hooks ) {
   });
 
   QUnit.test("traverse_DOM()", function( assert ) {
-    assert.ok(
-      true,
-      "placeholder"
+    this.bind.traverse_DOM(this.el); 
+    assert.equal(
+      this.el,
+      this.bind.nodes[0].el,
+      "traverse_DOM finds childnode #text and calls node_builder \
+       which adds a object to the node object."
     );
+
+    assert.equal(
+      this.bind.token,
+      1,
+      "traverse_DOM finds childnode #text and calls node_builder \
+       which increments token from 0 to 1."
+    );
+
   });
 
   QUnit.test("node_builder()", function( assert ) {
-    assert.ok(
-      true,
-      "placeholder"
+    this.bind.node_builder(this.el, 0);
+    assert.equal(
+      this.bind.nodes[0].el,
+      this.el,
+      "node_builder sets the node object el to #test-element."
+    );
+
+    assert.equal(
+      this.bind.nodes[0].binding[0],
+      "{{ testBind }}",
+      "node_builder sets the node object binding to an array containing \
+       all the bind {{  }}, templates."
+    );
+
+    assert.equal(
+      this.bind.nodes[0].origin,
+      "{{ testBind }}",
+      "node_builder sets the node object origin to {{ testBind }}."
+    );
+    console.dir(this.bind.nodes);
+
+    assert.equal(
+      this.bind.nodes[0].key,
+      0,
+      "node_builder sets the node object key to 0."
+    );
+
+    assert.equal(
+      this.bind.token,
+      1,
+      "node_builder increments token from 0 to 1 after setting node obj."
     );
   });
 
   QUnit.test("bind_data()", function( assert ) {
-    assert.ok(
-      true,
-      "placeholder"
+    this.bind.bind_data(this.data);
+    assert.equal(
+      this.el.childNodes[0].nodeValue,
+      "Successful Bind", 
+      "bind_data binds model data to view template."
     );
   });
 });
 
 
-// Contains test for the Bind_factory
 QUnit.module("Bind_factory", function( hooks ) {
-  // setUp before each test
   hooks.beforeEach(function() {
     this.el = document.getElementById("test-element");
     this.data = { testBind: "Successful Bind" };
   });
 
-  // tearDown after each test
   hooks.afterEach(function() {
     restoreState(this.el, "{{ testBind }}");
   });
