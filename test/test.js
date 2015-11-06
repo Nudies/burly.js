@@ -54,7 +54,7 @@ QUnit.module("Burly", function( hooks ) {
 
     assert.equal(
       this.el.innerHTML,
-      "Successful Bind",
+      this.data.testBind,
       "Model data bound to a views {{ key }}"
     );
 
@@ -89,7 +89,7 @@ QUnit.module("Bind", function( hooks ) {
 
     assert.equal(
       this.el.innerHTML,
-      "Successful Bind",
+      this.data.testBind,
       "Model data bound to a views {{ key }}"
     );
 
@@ -165,7 +165,7 @@ QUnit.module("Bind", function( hooks ) {
     this.bind.bind_data(this.data);
     assert.equal(
       this.el.childNodes[0].nodeValue,
-      "Successful Bind", 
+      this.data.testBind, 
       "bind_data binds model data to view template."
     );
   });
@@ -176,6 +176,7 @@ QUnit.module("Bind_factory", function( hooks ) {
   hooks.beforeEach(function() {
     this.el = document.getElementById("test-element");
     this.data = { testBind: "Successful Bind" };
+    this.factory = new Bind_factory()
   });
 
   hooks.afterEach(function() {
@@ -183,9 +184,17 @@ QUnit.module("Bind_factory", function( hooks ) {
   });
 
   QUnit.test("build()", function( assert ) {
-    assert.ok(
-      true,
-      "placeholder"
+    assert.equal(
+      "function",
+      typeof this.factory.build,
+      "Build_factory has build function"
+    );
+
+    this.factory.build("view", this.data)
+    assert.equal(
+      this.el.innerHTML,
+      this.data.testBind,
+      "Build_factory has build function"
     );
   });
 });
