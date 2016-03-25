@@ -195,7 +195,7 @@
 
       var bind;
 
-      if ( typeof debug !== true ) {
+      if ( debug !== true ) {
         debug = false;
       }
 
