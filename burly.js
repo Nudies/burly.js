@@ -1,5 +1,5 @@
 /**
- *  ~burly.js lightweight html templating~
+ *  ~burly.js lightweight data binding~
  *  @author: nudies@github.com
  *  @version: 1.0.5
  *  @license: MIT
@@ -9,17 +9,18 @@
   'use strict';
   var Burly = {};
   var safe = ['PRE', 'CODE'];  // Element that won't be inspected
-  var re = /\{\{\s*(\w+)\s*\}\}/g;
-  var re2 = /\{\{\s*(\w+)\s*\}\}/;
+  var re = /\{\{\s*(\S+)\s*\}\}/g;
+  var re2 = /\{\{\s*(\S+)\s*\}\}/;
 
 
   if ( global.QUnit !== 'undefined' ) {
     // Objects and functions we want to expose to
     // the global scope for testing.
     global.Bind = Bind;
-    global.Bind_factory = Bind_factory;
+    global.BindFactory = BindFactory;
     global.Util = {
-      curlyRe: curlyRe
+      curlyRe: curlyRe,
+      getValue: getValue
     };
   }
 
@@ -31,6 +32,24 @@
    */
   function curlyRe( str ) {
     return str.match(re);
+  }
+
+  /**
+  * Returns the value of an objects properties.
+  * through dot notation, ex. 'foo.bar.baz'
+  * @function getValue
+  * @param {string} access - The property accessor for the data object. Supports dot notation.
+  * @param {object} data - The object to get a value from
+  * @returns {string} The value accessed in data
+  */
+  function getValue ( access, data ) {
+    var accessVals = access.split('.');
+    var value = data;
+
+    for ( var i = 0; i < accessVals.length; i++ ) {
+      value = value[accessVals[i]];
+    }
+    return value;
   }
 
   /**
@@ -63,12 +82,12 @@
   /**
    * Perform a regex search on a elements textNode.
    * If it matches the {{ }} pattern then add to our node obj.
-   * @method node_builder
+   * @method nodeBuilder
    * @memberof Bind
    * @param {object} el - A DOM element that does NOT have children.
    * @param {number} x - Index location for list el.childNodes.
    */
-  Bind.prototype.node_builder = function( el, x ) {
+  Bind.prototype.nodeBuilder = function( el, x ) {
     var txtNode = el.childNodes[x].nodeValue;
 
     if ( txtNode ) {
@@ -86,21 +105,21 @@
 
   /**
    * Recursively search a element until it has no more children.
-   * @method traverse_DOM
+   * @method traverseDOM
    * @memberof Bind
    * @param {object} el - a DOM element that may or maynot have children.
    */
-  Bind.prototype.traverse_DOM = function( el ){
+  Bind.prototype.traverseDOM = function( el ){
     for ( var x = 0; x < el.childNodes.length; x++ ) {
       if ( el.childNodes[x].nodeName === '#text' ) {
-        this.node_builder( el, x );
+        this.nodeBuilder( el, x );
       }
     }
 
     for ( var i = 0; i < el.childElementCount; i++ ) {
       // Do not inspect elements inside of the safe array for bindings
       if ( safe.indexOf( el.children[i].nodeName ) === -1 ) {
-        this.traverse_DOM( el.children[i] );
+        this.traverseDOM( el.children[i] );
       }
     }
   };
@@ -108,22 +127,27 @@
   /**
    * Binds the data object to its coresponding DOM element
    * and replaces the {{ key }} with the data model value.
-   * @method bind_data
+   * @method bindData
    * @memberof Bind
    * @param {object} data - Model data to be bound to view.
    */
-  Bind.prototype.bind_data = function( data ) {
+  Bind.prototype.bindData = function( data ) {
     var node, k;
+    var matches;
 
     for ( var key in this.nodes ) {
       node = this.nodes[key];
       k = node.key;
 
+      // If this is the second time binding a particular binding {{ foo }}, then
+      // the current nodeValue will be "foo". We need to set it back to {{ foo }}
+      // for pattern matching reasons.
       node.el.childNodes[k].nodeValue = node.origin;
       for ( var x = 0; x < node.binding.length; x++ ) {
+        matches = re2.exec( node.binding[x] );
         node.el.childNodes[k].nodeValue = node.el.childNodes[k].nodeValue.replace(
-          re2.exec( node.binding[x] )[0],
-          data[re2.exec( node.binding[x] )[1]]
+          matches[0],                 // the matched text "{{ foo }}"
+          getValue(matches[1], data)  // matches[1] is the capture group text "foo"
         );
       }
     }
@@ -131,7 +155,7 @@
 
   /**
    * Core method for setting our instance variables and running
-   * the the bind_data method.
+   * the the bindData method.
    * @method run
    * @memberof Bind
    * @param {string} view - DOM scope.
@@ -157,10 +181,10 @@
     }
 
     if ( this.root && !this.nodes.length ) {
-      this.traverse_DOM(this.root);
+      this.traverseDOM(this.root);
     }
 
-    this.bind_data( data );
+    this.bindData( data );
 
     if ( debug ) {
       console.log( 'Name: ', this.root.dataset.bind );
@@ -174,25 +198,24 @@
   /**
    * Creates new Bind object or reuses one if it already
    * exists for a givien view
-   * @constructor Bind_factory
+   * @constructor BindFactory
    * @param {string} view - DOM scope.
    * @param {object} data - Model data to be bound to view.
    * @param {bool} debug - Debug mode. Default is false.
    */
-  function Bind_factory( ) {
+  function BindFactory( ) {
     // Collection of Bind objects
     var binds = {};
 
     /**
      * Creates a new Bind object or uses an existing one
      * @method build
-     * @memberof Bind_factory
+     * @memberof BindFactory
      * @param {string} view - DOM scope.
      * @param {object} data - Model data to be bound to view.
      * @param {bool} debug - Debug mode value.
      */
     this.build = function( view, data, debug ) {
-
       var bind;
 
       if ( debug !== true ) {
@@ -208,7 +231,7 @@
     };
   }
 
-  var Factory = new Bind_factory();
+  var Factory = new BindFactory();
 
   Burly.render = function( view, data, debug ) {
     Factory.build( view, data, debug );

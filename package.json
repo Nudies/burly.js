@@ -1,7 +1,7 @@
 {
   "name": "burly",
-  "version": "1.0.5",
-  "description": "js data binding",
+  "version": "1.1.0",
+  "description": "lightweight data binding",
   "main": "burly.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

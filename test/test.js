@@ -6,20 +6,43 @@ function restoreState(el, body) {
 
 QUnit.module("Util", function( hooks ) {
   QUnit.test("curlyRe()", function( assert ) {
+    assert.ok(
+      Util.curlyRe("{{ test }}") instanceof Array,
+      "Returns an array when regex matches"
+    );
+
+    assert.ok(
+      Util.curlyRe("{ test }}") === null,
+      "Returns null when regex does not match"
+    );
+  });
+
+  QUnit.test("getValue()", function( assert ) {
+    var data = {
+      foo: {
+        bar: {
+          baz: "nested"
+        }
+      },
+      quux: "not nested"
+    };
+
     assert.equal(
-      "function",
-      typeof Util.curlyRe,
-      "curlyRe is a function"
+      "nested",
+      Util.getValue("foo.bar.baz", data),
+      "Returns value of object property (nested) using dot notation"
     );
 
-    assert.ok(
-        Util.curlyRe("{{ test }}") instanceof Array,
-        "Returns an array when regex matches"
+    assert.equal(
+      "not nested",
+      Util.getValue("quux", data),
+      "Returns value of object property (not nested)"
     );
 
-    assert.ok(
-        Util.curlyRe("{ test }}") === null,
-        "Returns null when regex does not match"
+    assert.equal(
+      undefined,
+      Util.getValue("bambi", data),
+      "Returns undefined when object has no matching propeties"
     );
   });
 });
@@ -31,6 +54,12 @@ QUnit.module("Burly", function( hooks ) {
   hooks.beforeEach(function() {
     this.el = document.getElementById("test-element");
     this.data = { testBind: "Successful Bind" };
+    this.el2 = document.getElementById("test-element2");
+    this.data2 = {
+                  testBind: {
+                    nested: "Successful Bind"
+                  }
+                };
   });
 
   hooks.afterEach(function() {
@@ -38,12 +67,6 @@ QUnit.module("Burly", function( hooks ) {
   });
 
   QUnit.test("render()", function( assert ) {
-    assert.equal(
-      "function",
-      typeof Burly.render,
-      "Burly contains a render function"
-    );
-
     assert.equal(
       this.el.innerHTML,
       "{{ testBind }}",
@@ -56,6 +79,14 @@ QUnit.module("Burly", function( hooks ) {
       this.el.innerHTML,
       this.data.testBind,
       "Model data bound to a views {{ key }}"
+    );
+
+    Burly.render( "view2", this.data2 );
+
+    assert.equal(
+      this.el2.innerHTML,
+      this.data2.testBind.nested,
+      "Model data bound to a views {{ nested.key }}"
     );
 
     assert.throws(
@@ -82,12 +113,6 @@ QUnit.module("Bind", function( hooks ) {
 
   QUnit.test("run()", function( assert ) {
     assert.equal(
-      "function",
-      typeof this.bind.run,
-      "Bind contains a run function"
-    );
-
-    assert.equal(
       this.el.innerHTML,
       this.data.testBind,
       "Model data bound to a views {{ key }}"
@@ -108,75 +133,74 @@ QUnit.module("Bind", function( hooks ) {
     );
   });
 
-  QUnit.test("traverse_DOM()", function( assert ) {
-    this.bind.traverse_DOM(this.el); 
+  QUnit.test("traverseDOM()", function( assert ) {
+    this.bind.traverseDOM(this.el);
     assert.equal(
       this.el,
       this.bind.nodes[0].el,
-      "traverse_DOM finds childnode #text and calls node_builder \
+      "traverseDOM finds childnode #text and calls nodeBuilder \
        which adds a object to the node object."
     );
 
     assert.equal(
       this.bind.token,
       1,
-      "traverse_DOM finds childnode #text and calls node_builder \
+      "traverseDOM finds childnode #text and calls nodeBuilder \
        which increments token from 0 to 1."
     );
 
   });
 
-  QUnit.test("node_builder()", function( assert ) {
-    this.bind.node_builder(this.el, 0);
+  QUnit.test("nodeBuilder()", function( assert ) {
+    this.bind.nodeBuilder(this.el, 0);
     assert.equal(
       this.bind.nodes[0].el,
       this.el,
-      "node_builder sets the node object el to #test-element."
+      "nodeBuilder sets the node object el to #test-element."
     );
 
     assert.equal(
       this.bind.nodes[0].binding[0],
       "{{ testBind }}",
-      "node_builder sets the node object binding to an array containing \
+      "nodeBuilder sets the node object binding to an array containing \
        all the bind {{  }}, templates."
     );
 
     assert.equal(
       this.bind.nodes[0].origin,
       "{{ testBind }}",
-      "node_builder sets the node object origin to {{ testBind }}."
+      "nodeBuilder sets the node object origin to {{ testBind }}."
     );
-    console.dir(this.bind.nodes);
 
     assert.equal(
       this.bind.nodes[0].key,
       0,
-      "node_builder sets the node object key to 0."
+      "nodeBuilder sets the node object key to 0."
     );
 
     assert.equal(
       this.bind.token,
       1,
-      "node_builder increments token from 0 to 1 after setting node obj."
+      "nodeBuilder increments token from 0 to 1 after setting node obj."
     );
   });
 
-  QUnit.test("bind_data()", function( assert ) {
-    this.bind.bind_data(this.data);
+  QUnit.test("bindData()", function( assert ) {
+    this.bind.bindData(this.data);
     assert.equal(
       this.el.childNodes[0].nodeValue,
       this.data.testBind, 
-      "bind_data binds model data to view template."
+      "bindData binds model data to view template."
     );
   });
 });
 
 
-QUnit.module("Bind_factory", function( hooks ) {
+QUnit.module("BindFactory", function( hooks ) {
   hooks.beforeEach(function() {
     this.el = document.getElementById("test-element");
     this.data = { testBind: "Successful Bind" };
-    this.factory = new Bind_factory()
+    this.factory = new BindFactory()
   });
 
   hooks.afterEach(function() {
@@ -184,17 +208,11 @@ QUnit.module("Bind_factory", function( hooks ) {
   });
 
   QUnit.test("build()", function( assert ) {
-    assert.equal(
-      "function",
-      typeof this.factory.build,
-      "Build_factory has build function"
-    );
-
     this.factory.build("view", this.data)
     assert.equal(
       this.el.innerHTML,
       this.data.testBind,
-      "Build_factory has build function"
+      "BuildFactory has build function"
     );
   });
 });
