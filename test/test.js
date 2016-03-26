@@ -5,6 +5,17 @@ function restoreState(el, body) {
 
 
 QUnit.module("Util", function( hooks ) {
+  hooks.beforeEach(function() {
+    this.data = {
+      foo: {
+        bar: {
+          baz: "nested"
+        }
+      },
+      quux: "not nested"
+    };
+  });
+
   QUnit.test("curlyRe()", function( assert ) {
     assert.ok(
       Util.curlyRe("{{ test }}") instanceof Array,
@@ -17,31 +28,34 @@ QUnit.module("Util", function( hooks ) {
     );
   });
 
-  QUnit.test("getValue()", function( assert ) {
-    var data = {
-      foo: {
-        bar: {
-          baz: "nested"
-        }
-      },
-      quux: "not nested"
-    };
+  QUnit.test("isFunction()", function( assert ) {
+    assert.ok(
+      Util.isFunction(function(){}),
+      "Passed in value is a function"
+    );
 
+    assert.notOk(
+      Util.isFunction({}),
+      "Passed in value is not a function"
+    );
+  });
+
+  QUnit.test("getValue()", function( assert ) {
     assert.equal(
       "nested",
-      Util.getValue("foo.bar.baz", data),
+      Util.getValue("foo.bar.baz", this.data),
       "Returns value of object property (nested) using dot notation"
     );
 
     assert.equal(
       "not nested",
-      Util.getValue("quux", data),
+      Util.getValue("quux", this.data),
       "Returns value of object property (not nested)"
     );
 
     assert.equal(
       undefined,
-      Util.getValue("bambi", data),
+      Util.getValue("bambi", this.data),
       "Returns undefined when object has no matching propeties"
     );
   });
@@ -64,6 +78,7 @@ QUnit.module("Burly", function( hooks ) {
 
   hooks.afterEach(function() {
     restoreState(this.el, "{{ testBind }}");
+    restoreState(this.el2, "{{ testBind.nested }}");
   });
 
   QUnit.test("render()", function( assert ) {

@@ -1,7 +1,7 @@
 /**
  *  ~burly.js lightweight data binding~
  *  @author: nudies@github.com
- *  @version: 1.0.5
+ *  @version: 1.2.0
  *  @license: MIT
  */
 
@@ -20,6 +20,7 @@
     global.BindFactory = BindFactory;
     global.Util = {
       curlyRe: curlyRe,
+      isFunction: isFunction,
       getValue: getValue
     };
   }
@@ -34,20 +35,44 @@
     return str.match(re);
   }
 
+
   /**
-  * Returns the value of an objects properties.
-  * through dot notation, ex. 'foo.bar.baz'
+   * Checks if the given argument is a function 
+   * @function isFunction
+   * @param {*} str
+   * @returns {boolean} 
+   */
+  function isFunction( val ) {
+    return typeof val === 'function'; 
+  }
+
+  /**
+  * Gets the value of an objects properties through dot notation, ex. 'foo.bar.baz'
   * @function getValue
   * @param {string} access - The property accessor for the data object. Supports dot notation.
   * @param {object} data - The object to get a value from
   * @returns {string} The value accessed in data
   */
   function getValue ( access, data ) {
-    var accessVals = access.split('.');
     var value = data;
+    var accessVals;
+    var args = [];
+
+    if ( access.indexOf(':') > -1 ) {
+      access = access.split(':');
+      args = access.splice(1);
+      accessVals = access[0].split('.');
+    }
+    else {
+      accessVals = access.split('.'); 
+    }
 
     for ( var i = 0; i < accessVals.length; i++ ) {
       value = value[accessVals[i]];
+    }
+
+    if ( isFunction(value) ) { 
+      return value.apply(global, args);
     }
     return value;
   }
@@ -140,14 +165,14 @@
       k = node.key;
 
       // If this is the second time binding a particular binding {{ foo }}, then
-      // the current nodeValue will be "foo". We need to set it back to {{ foo }}
+      // the current nodeValue will be 'foo'. We need to set it back to {{ foo }}
       // for pattern matching reasons.
       node.el.childNodes[k].nodeValue = node.origin;
       for ( var x = 0; x < node.binding.length; x++ ) {
         matches = re2.exec( node.binding[x] );
         node.el.childNodes[k].nodeValue = node.el.childNodes[k].nodeValue.replace(
-          matches[0],                 // the matched text "{{ foo }}"
-          getValue(matches[1], data)  // matches[1] is the capture group text "foo"
+          matches[0],                 // the matched text '{{ foo }}'
+          getValue(matches[1], data)  // matches[1] is the capture group text 'foo'
         );
       }
     }
@@ -177,7 +202,7 @@
     }
 
     if ( !this.root ) {
-      throw "undefined view: " + view;
+      throw 'undefined view: ' + view;
     }
 
     if ( this.root && !this.nodes.length ) {
