@@ -62,8 +62,7 @@
       access = access.split(':');
       args = access.splice(1);
       accessVals = access[0].split('.');
-    }
-    else {
+    } else {
       accessVals = access.split('.'); 
     }
 
